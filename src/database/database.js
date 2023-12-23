@@ -1,16 +1,12 @@
-import mysql from "promise-mysql";
-import config from "./../config";
+const { Sequelize } = require('sequelize');
+import {config} from "dotenv"
 
-const conn = mysql.createConnection({
-    host:config.host,
-    database:config.database,
-    user:config.user
-});
+config()
 
-function getConn () {
-    return conn
-}
+const db = new Sequelize(process.env.DATABASE, process.env.USER, "", {
+    host: process.env.HOST,
+    dialect: 'mysql',
+  });
 
-module.exports = {
-    getConn
-};
+
+module.exports = db;

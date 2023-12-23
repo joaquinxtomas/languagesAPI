@@ -1,10 +1,10 @@
-import { getConn } from "./../database/database"
+import {Language} from "../models/Language";
+
 
 const getLanguage = async (req, res) => {
     try {
-        const connection = await getConn();
-        const result = await connection.query("SELECT id, name, programmers FROM languages");
-        res.json(result);
+        const languages= await Language.findAll()
+        res.json(languages)
     } catch (error) {
         res.status(500);
         res.send(error.message)
@@ -13,20 +13,14 @@ const getLanguage = async (req, res) => {
 
 const createLanguage = async (req, res) => {
     try {
-        const { id, name, programmers } = req.body
+        const { name, programmers, createdAt, updatedAt} = req.body
 
         if (name == undefined || name == "" || programmers == undefined) {
             res.status(400).json({ message: "Bad request. Insert all the fields." })
         }
 
-        const connection = await getConn();
-
-        const result = await connection.query(
-            "INSERT INTO languages (id, name, programmers) VALUES (?, ?, ?)",
-            [id, name, programmers]
-        );
-
-        res.json("The language is created OK")
+        const createLanguage = await Language.create({name, programmers, createdAt, updatedAt});
+        res.json(createLanguage)
     } catch (error) {
         res.status(500);
         res.send(error.message)
@@ -37,13 +31,8 @@ const getById = async (req, res) => {
     try {
         const { id } = req.params
 
-        const connection = await getConn();
-
-        const result = await connection.query(
-            "SELECT * FROM languages WHERE id = ?", [id]
-        );
-
-        res.json(result[0])
+        const languages= await Language.findByPk(id)
+        res.json(languages)
     } catch (error) {
         res.status(500);
         res.send(error.message)
@@ -54,17 +43,13 @@ const updateLanguage = async (req, res) => {
     try {   
 
         const {id} = req.params;
-        const {name, programmers} = req.body;
+        const {name, programmers, createdAt, updatedAt} = req.body;
 
         if (name == undefined || name == "" || programmers == undefined) {
             res.status(400).json({ message: "Bad request. Insert all the fields." })
         }
 
-        const conecction = await getConn();
-
-        const updateLang = await conecction.query(
-            "UPDATE languages SET name = ?, programmers = ? WHERE id = ?", [name, programmers,id]
-        )
+        const updateLang = await Language.update({name,programmers,createdAt, updatedAt}, {where: {id: id}})
 
         res.json("The language is updated")
 
@@ -77,11 +62,8 @@ const updateLanguage = async (req, res) => {
 const deleteLanguage = async (req, res) => {
     try {
         const { id } = req.params
-        const conecction = await getConn();
 
-        const deleteLang = await conecction.query(
-            "DELETE FROM languages WHERE id = ?", [id]
-        )
+        const deletedLanguage = await Language.destroy({where: {id:id}})
 
         res.json("The language is deleted OK")
     } catch (error) {
